@@ -4,355 +4,201 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Verbale di Sopralluogo Ambientale - Terzo Valico AV/AC</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- Firebase SDK per il Cloud Realtime Storage -->
+  <!-- Firebase SDK per il salvataggio Cloud -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-    body { background-color: #f1f5f9; color: #1e293b; padding-bottom: 3rem; }
-    header { background-color: #0f172a; color: #ffffff; padding: 12px 20px; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .header-content { max-width: 1000px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
-    .btn { padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
-    .btn-cloud { background-color: #0284c7; color: white; }
-    .btn-cloud-load { background-color: #0d9488; color: white; }
-    .btn-danger { background-color: #7f1d1d; color: #fecaca; border: 1px solid #991b1b; }
-    .btn-success { background-color: #059669; color: white; }
-    .btn-primary { background-color: #047857; color: white; }
-    
-    .container { max-width: 1000px; margin: 20px auto; padding: 0 16px; }
-    .card { background: white; border-radius: 12px; border: 1px solid #cbd5e1; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-    
-    /* Frontalino */
-    .header-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; border: 1px solid #0f172a; }
-    .header-table td { border: 1px solid #0f172a; padding: 10px; vertical-align: top; }
-    .bg-light { background-color: #f8fafc; }
-    .tag-title { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 4px; }
-    
-    .section-title { font-size: 14px; font-weight: 700; text-transform: uppercase; color: #0f172a; border-bottom: 2px solid #0f172a; padding-bottom: 6px; margin: 24px 0 14px 0; display: flex; justify-content: space-between; align-items: center; }
-    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
-    .form-group { display: flex; flex-direction: column; margin-bottom: 8px; }
-    .form-group label { font-size: 11px; font-weight: 600; color: #475569; margin-bottom: 4px; }
-    .form-control { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; }
-    .form-control:focus { border-color: #059669; box-shadow: 0 0 0 2px rgba(5,150,105,0.2); }
-    
-    /* Badge Partecipanti */
-    .badge { display: inline-flex; align-items: center; gap: 6px; background: #e2e8f0; color: #1e293b; padding: 4px 10px; border-radius: 20px; font-size: 12px; margin: 2px; }
-    .badge-close { cursor: pointer; color: #ef4444; font-weight: bold; }
-    
-    /* Aspetti Ambientali */
-    .aspect-box { border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 12px; background: #f8fafc; overflow: hidden; }
-    .aspect-header { padding: 10px 14px; background: #e2e8f0; font-weight: 700; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
-    .aspect-body { padding: 12px; display: none; background: white; }
-    .item-row { border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 8px; background: #fafafa; }
-    .item-top { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; align-items: center; }
-    .item-text { font-size: 12px; font-weight: 600; color: #334155; flex: 1; min-width: 200px; }
-    .radio-group { display: flex; gap: 6px; font-size: 12px; }
-    .radio-btn { padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1; background: white; cursor: pointer; }
-    
-    /* Foto Miniature */
-    .photo-preview-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-    .photo-thumb { position: relative; display: inline-block; width: 50px; height: 50px; border-radius: 4px; overflow: hidden; border: 1px solid #cbd5e1; }
-    .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
-    .photo-delete { position: absolute; top: 1px; right: 1px; background: rgba(239, 68, 68, 0.9); color: white; border: none; font-size: 10px; width: 16px; height: 16px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-
-    /* Canvas Firme */
-    .canvas-container { border: 1px solid #cbd5e1; border-radius: 6px; background: white; position: relative; margin-top: 6px; }
-    canvas { width: 100%; height: 110px; touch-action: none; cursor: crosshair; }
-    
     @media print {
       .no-print { display: none !important; }
-      body { background: white; padding: 0; }
-      .container { max-width: 100%; margin: 0; padding: 0; }
-      .card { border: none; box-shadow: none; padding: 0; }
+      body { background-color: #fff !important; color: #000 !important; font-size: 10pt; }
+      .print-container { width: 100% !important; max-width: none !important; margin: 0 !important; padding: 0 !important; box-shadow: none !important; }
+      textarea, input { border: none !important; background: transparent !important; resize: none !important; }
       .aspect-inactive-print { display: none !important; }
+      .header-table { border: 1px solid #000 !important; width: 100% !important; border-collapse: collapse !important; }
+      .header-table td { border: 1px solid #000 !important; padding: 6px !important; }
     }
   </style>
 </head>
-<body>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen pb-12">
 
-  <!-- Top Bar Comandi -->
-  <header class="no-print">
-    <div class="header-content">
-      <div>
-        <h1 style="font-size: 16px;">Verbale Ambientale Terzo Valico</h1>
-        <p style="font-size: 11px; opacity: 0.8;">IG51-0-0-E-CV-PS-IM-00-0-0-006</p>
+  <!-- Top Bar Comandi (No Print) -->
+  <header class="bg-slate-900 text-white sticky top-0 z-50 shadow-md no-print">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
+      <div class="flex items-center space-x-3">
+        <i class="fa-solid fa-leaf text-emerald-400 text-2xl"></i>
+        <div>
+          <h1 class="font-bold text-lg leading-tight">Verbale Ambientale Terzo Valico</h1>
+          <p class="text-xs text-slate-400">Procedura IG51-0-0-E-CV-PS-IM-00-0-0-006</p>
+        </div>
       </div>
-      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <button onclick="saveToCloud()" class="btn btn-cloud">☁️ Salva in Cloud</button>
-        <button onclick="loadFromCloud()" class="btn btn-cloud-load">📂 Apri da Cloud</button>
-        <button onclick="window.print()" class="btn btn-success">📄 Esporta PDF / Stampa</button>
+      <div class="flex items-center gap-2 flex-wrap">
+        <button onclick="saveToCloud()" class="bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded text-sm flex items-center gap-2 transition">
+          <i class="fa-solid fa-cloud-arrow-up"></i> <span class="hidden sm:inline">Salva in Cloud</span>
+        </button>
+        <button onclick="loadFromCloud()" class="bg-teal-700 hover:bg-teal-600 text-white px-3 py-1.5 rounded text-sm flex items-center gap-2 transition">
+          <i class="fa-solid fa-cloud-arrow-down"></i> <span class="hidden sm:inline">Apri da Cloud</span>
+        </button>
+        <button onclick="resetForm()" class="bg-red-900/40 hover:bg-red-800/60 text-red-200 border border-red-700 px-3 py-1.5 rounded text-sm flex items-center gap-2 transition">
+          <i class="fa-solid fa-rotate-right"></i> <span class="hidden sm:inline">Reset</span>
+        </button>
+        <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-1.5 rounded text-sm flex items-center gap-2 shadow transition">
+          <i class="fa-solid fa-file-pdf"></i> Esporta PDF / Stampa
+        </button>
       </div>
     </div>
   </header>
 
-  <main class="container">
-    <div class="card">
+  <main class="max-w-5xl mx-auto my-6 px-4 print-container">
+    <div class="bg-white rounded-xl shadow-lg border border-slate-200 p-6 md:p-8">
 
       <!-- FRONTALINO UFFICIALE DI INTESTAZIONE -->
-      <table class="header-table">
+      <table class="w-full border-collapse border border-slate-900 mb-6 header-table text-slate-900">
         <tr>
-          <td style="width: 50%;">
-            <div class="tag-title">GENERAL CONTRACTOR</div>
-            <div style="margin: 6px 0; display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 22px; font-weight: 900; color: #dc2626;">webuild</span>
-              <span style="border-left: 1px solid #94a3b8; padding-left: 6px; font-size: 11px; font-weight: bold; color: #334155;">Terzo Valico AV/AC</span>
+          <!-- Cella Sinistra: General Contractor -->
+          <td class="w-1/2 border border-slate-900 p-3 align-top bg-white">
+            <div class="text-[10px] uppercase tracking-wider font-semibold text-slate-600 mb-1">GENERAL CONTRACTOR</div>
+            <div class="flex items-center gap-2 my-2">
+              <span class="text-2xl font-black tracking-tighter text-red-600">webuild</span>
+              <div class="border-l border-slate-400 pl-2">
+                <div class="text-[11px] font-bold text-slate-700 leading-none">Terzo Valico</div>
+                <div class="text-[10px] font-semibold text-slate-500 leading-none">AV/AC</div>
+              </div>
             </div>
           </td>
-          <td style="width: 50%;">
-            <div class="tag-title">ALTA SORVEGLIANZA</div>
-            <div style="margin: 6px 0;">
-              <span style="font-size: 20px; font-weight: 900; font-style: italic; color: #065f46;">ITALFERR</span>
+
+          <!-- Cella Destra: Alta Sorveglianza -->
+          <td class="w-1/2 border border-slate-900 p-3 align-top bg-white">
+            <div class="text-[10px] uppercase tracking-wider font-semibold text-slate-600 mb-1">ALTA SORVEGLIANZA</div>
+            <div class="flex items-center gap-2 my-2">
+              <span class="text-2xl font-black italic text-emerald-800 tracking-wider">ITALFERR</span>
             </div>
-            <div style="font-size: 9px; font-weight: 700; color: #475569;">GRUPPO FERROVIE DELLO STATO ITALIANE</div>
+            <div class="text-[9px] font-bold text-slate-600 uppercase tracking-tight">GRUPPO FERROVIE DELLO STATO ITALIANE</div>
           </td>
         </tr>
-        <tr class="bg-light">
-          <td style="font-weight: 900; font-size: 16px; text-transform: uppercase;">Verbale di sopralluogo</td>
-          <td style="font-size: 11px; font-weight: 600;">Allegato 5 Procedura: Sorveglianza ambientale dei lavori - IG51-0-0-E-CV-PS-IM-00-0-0-006</td>
+
+        <tr>
+          <!-- Titolo Documento -->
+          <td class="w-1/2 border border-slate-900 p-3 align-middle bg-slate-50">
+            <h2 class="text-lg md:text-xl font-black text-slate-900 uppercase tracking-tight">Verbale di sopralluogo</h2>
+          </td>
+
+          <!-- Riferimento Procedura -->
+          <td class="w-1/2 border border-slate-900 p-3 align-middle bg-slate-50">
+            <p class="text-xs font-semibold text-slate-800 leading-snug">
+              Allegato 5 Procedura: Sorveglianza ambientale dei lavori - IG51-0-0-E-CV-PS-IM-00-0-0-006
+            </p>
+          </td>
         </tr>
       </table>
 
-      <!-- SEZIONE 1 -->
-      <div class="section-title">1. Dati Generali del Sopralluogo</div>
-      <div class="grid-2">
-        <div class="form-group">
-          <label>Cantiere</label>
-          <input type="text" id="cantiere" placeholder="Es. Terzo Valico - Lotto..." class="form-control">
-        </div>
-        <div class="form-group">
-          <label>Area / WBS</label>
-          <input type="text" id="area" placeholder="Es. Area San Bovo (LP03)" class="form-control">
-        </div>
-        <div class="form-group">
-          <label>Data e Ora Sopralluogo</label>
-          <input type="datetime-local" id="datetime" class="form-control">
-        </div>
-        <div class="form-group">
-          <label>Oggetto dei Lavori / Scopo</label>
-          <input type="text" id="oggetto" placeholder="Es. Verifiche ambientali e scavi" class="form-control">
-        </div>
-      </div>
-
-      <div style="margin-top: 12px; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
-        <label style="font-size: 12px; font-weight: 700; display: block; margin-bottom: 6px;">Partecipanti al Sopralluogo / Presenti</label>
-        <div class="no-print" style="display: flex; gap: 8px; margin-bottom: 8px;">
-          <input type="text" id="input-partecipante-nome" placeholder="Nome e Cognome" class="form-control">
-          <input type="text" id="input-partecipante-ruolo" placeholder="Ruolo / Società" class="form-control" onkeypress="if(event.key==='Enter') addParticipant()">
-          <button onclick="addParticipant()" class="btn btn-primary" style="white-space: nowrap;">+ Aggiungi</button>
-        </div>
-        <div id="participants-list"></div>
-      </div>
-
-      <!-- SEZIONE 2: LE 9 COMPONENTI STATICHE -->
-      <div class="section-title">2. Valutazione Aspetti Ambientali (IG51)</div>
-      <p style="font-size: 11px; color: #64748b; margin-bottom: 12px;" class="no-print">Spunta "Presente / Rilevante" per attivare le specifiche verifiche di ciascuna componente.</p>
-
-      <div id="aspects-container">
-        
-        <!-- COMPONENTE 1 -->
-        <div id="aspect_card_0" class="aspect-box aspect-inactive-print">
-          <div class="aspect-header">
-            <span>1. APPROVVIGIONAMENTO IDRICO E GESTIONE ACQUE REFLUE</span>
-            <label class="no-print" style="font-size: 11px; font-weight: normal; cursor: pointer;">
-              <input type="checkbox" id="aspect_chk_0" onchange="toggleBody('body_0', 'aspect_card_0', this.checked)"> Presente / Rilevante
-            </label>
+      <!-- SEZIONE 1: Dati Generali e Partecipanti -->
+      <section class="mb-8">
+        <h3 class="text-md font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2 border-b pb-1">
+          <i class="fa-solid fa-circle-info text-emerald-600"></i> 1. Dati Generali del Sopralluogo
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Cantiere</label>
+            <input type="text" id="cantiere" placeholder="Es. Terzo Valico - Lotto..." class="w-full border border-slate-300 rounded p-2 focus:ring-2 focus:ring-emerald-500 outline-none">
           </div>
-          <div id="body_0" class="aspect-body">
-            <div style="font-size: 10px; font-weight: bold; color: #64748b; margin: 4px 0;">PRELIEVI</div>
-            <script>document.write(renderRow('c1_p1', 'Presenti approvvigionamenti idrici in cantiere'));</script>
-            <script>document.write(renderRow('c1_p2', 'Misurazione e registrazione dei prelievi idrici'));</script>
-            <script>document.write(renderRow('c1_p3', 'Effettuazione analisi delle acque'));</script>
-            <script>document.write(renderRow('c1_p4', 'Presenza della programmazione annuale controlli prelievi'));</script>
-
-            <div style="font-size: 10px; font-weight: bold; color: #64748b; margin: 10px 0 4px 0;">SCARICHI</div>
-            <script>document.write(renderRow('c1_s1', 'Presenti scarichi idrici in cantiere'));</script>
-            <script>document.write(renderRow('c1_s2', 'Controllo parametri prima dell\'immissione nel reticolo idrico'));</script>
-            <script>document.write(renderRow('c1_s3', 'Controllo mensile parametri (pH, solidi sospesi, COD, idrocarburi)'));</script>
-            <script>document.write(renderRow('c1_s4', 'Campionamento scarico ed analisi da personale qualificato (ACCREDIA)'));</script>
-            <script>document.write(renderRow('c1_s5', 'Presenza impianto trattamento acque'));</script>
-            <script>document.write(renderRow('c1_s6', 'Funzionamento sistemi rilevamento in continuo'));</script>
-            <script>document.write(renderRow('c1_s7', 'Pianificazione manutenzione apparecchiature'));</script>
-            <script>document.write(renderRow('c1_s8', 'Pianificazione gestione emergenze'));</script>
-            <script>document.write(renderRow('c1_s9', 'Autorizzazioni vigenti'));</script>
-            <script>document.write(renderRow('c1_s10', 'Compilazione registri previsti SGA'));</script>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Area / WBS</label>
+            <input type="text" id="area" placeholder="Es. Area San Bovo (LP03) / COP1" class="w-full border border-slate-300 rounded p-2 focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Data e Ora Sopralluogo</label>
+            <input type="datetime-local" id="datetime" class="w-full border border-slate-300 rounded p-2 focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Oggetto dei Lavori / Scopo</label>
+            <input type="text" id="oggetto" placeholder="Es. Verifiche ambientali e gestione acque/scavi" class="w-full border border-slate-300 rounded p-2 focus:ring-2 focus:ring-emerald-500 outline-none">
           </div>
         </div>
 
-        <!-- COMPONENTE 2 -->
-        <div id="aspect_card_1" class="aspect-box aspect-inactive-print">
-          <div class="aspect-header">
-            <span>2. EMISSIONI IN ATMOSFERA</span>
-            <label class="no-print" style="font-size: 11px; font-weight: normal; cursor: pointer;">
-              <input type="checkbox" id="aspect_chk_1" onchange="toggleBody('body_1', 'aspect_card_1', this.checked)"> Presente / Rilevante
-            </label>
+        <!-- Partecipanti -->
+        <div class="border border-slate-200 rounded-lg p-3 bg-slate-50/50">
+          <label class="block text-xs font-bold text-slate-700 mb-2">Partecipanti al Sopralluogo / Presenti</label>
+          <div class="flex gap-2 mb-3 no-print">
+            <input type="text" id="input-partecipante-nome" placeholder="Nome e Cognome" class="w-1/2 border border-slate-300 rounded p-2 text-xs outline-none">
+            <input type="text" id="input-partecipante-ruolo" placeholder="Ruolo / Società (es. Referente HSE)" class="w-1/2 border border-slate-300 rounded p-2 text-xs outline-none" onkeypress="if(event.key === 'Enter') addParticipant()">
+            <button onclick="addParticipant()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-3 py-2 rounded text-xs flex items-center gap-1 font-medium">
+              <i class="fa-solid fa-user-plus"></i> Aggiungi
+            </button>
           </div>
-          <div id="body_1" class="aspect-body">
-            <script>document.write(renderRow('c2_1', 'Presenza punti di emissione in atmosfera'));</script>
-            <script>document.write(renderRow('c2_2', 'Presenza sistemi abbattimento polveri'));</script>
-            <script>document.write(renderRow('c2_3', 'Presenza potenziale polverosità/fangosità piste'));</script>
-            <script>document.write(renderRow('c2_4', 'Presenza vasche lavaggio ruote ed effettivo utilizzo'));</script>
-            <script>document.write(renderRow('c2_5', 'Compilazione registri previsti SGA'));</script>
+          <div id="participants-list" class="flex flex-wrap gap-2 mb-2"></div>
+        </div>
+      </section>
+
+      <!-- SEZIONE 2: Le 9 Componenti Ambientali -->
+      <section class="mb-8">
+        <div class="flex justify-between items-center mb-4 border-b pb-2">
+          <h3 class="text-md font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-list-check text-emerald-600"></i> 2. Valutazione Aspetti Ambientali (IG51)
+          </h3>
+          <span class="text-xs text-slate-500 italic">Attiva gli aspetti rilevanti per mostrare i controlli di dettaglio</span>
+        </div>
+        <div id="aspects-container" class="space-y-4"></div>
+      </section>
+
+      <!-- SEZIONE 3: Rilievi e Note di Cantiere -->
+      <section class="mb-8">
+        <div class="flex justify-between items-center mb-3 border-b pb-1">
+          <h3 class="text-md font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-triangle-exclamation text-amber-500"></i> 3. Rilievi, Anomalie e Note di Cantiere
+          </h3>
+          <button onclick="addObservation()" class="no-print bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-1.5 rounded flex items-center gap-1 transition">
+            <i class="fa-solid fa-plus"></i> Aggiungi Rilievo
+          </button>
+        </div>
+        <div id="observations-list" class="space-y-3"></div>
+      </section>
+
+      <!-- SEZIONE 4: Conclusioni -->
+      <section class="mb-8">
+        <h3 class="text-md font-bold text-slate-800 uppercase tracking-wider mb-2 border-b pb-1 flex items-center gap-2">
+          <i class="fa-solid fa-comment-dots text-emerald-600"></i> 4. Conclusioni e Prescrizioni Finali
+        </h3>
+        <textarea id="conclusioni" rows="3" placeholder="Inserire raccomandazioni o prescrizioni per la Direzione di Cantiere..." class="w-full border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+      </section>
+
+      <!-- SEZIONE 5: Firme Canvas -->
+      <section class="mt-8 border-t pt-6">
+        <h3 class="text-md font-bold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-signature text-emerald-600"></i> 5. Firme di Convalida
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="border rounded-lg p-3 bg-slate-50 flex flex-col justify-between">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Il Redattore / Referente Ambientale</label>
+              <input type="text" id="nome-redattore" placeholder="Nome e Cognome" class="w-full border border-slate-300 rounded p-1.5 text-xs mb-2">
+              <div class="border border-slate-300 rounded bg-white relative">
+                <canvas id="canvas-redattore" class="w-full h-28 touch-none cursor-crosshair"></canvas>
+                <button onclick="clearCanvas('canvas-redattore')" class="no-print absolute top-1 right-1 text-slate-400 hover:text-red-500 text-xs px-1.5 py-0.5 rounded bg-slate-100">Pulisci</button>
+              </div>
+            </div>
+          </div>
+          <div class="border rounded-lg p-3 bg-slate-50 flex flex-col justify-between">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">La Direzione di Cantiere / Rappresentante</label>
+              <input type="text" id="nome-direzione" placeholder="Nome e Cognome" class="w-full border border-slate-300 rounded p-1.5 text-xs mb-2">
+              <div class="border border-slate-300 rounded bg-white relative">
+                <canvas id="canvas-direzione" class="w-full h-28 touch-none cursor-crosshair"></canvas>
+                <button onclick="clearCanvas('canvas-direzione')" class="no-print absolute top-1 right-1 text-slate-400 hover:text-red-500 text-xs px-1.5 py-0.5 rounded bg-slate-100">Pulisci</button>
+              </div>
+            </div>
           </div>
         </div>
-
-        <!-- COMPONENTE 3 -->
-        <div id="aspect_card_2" class="aspect-box aspect-inactive-print">
-          <div class="aspect-header">
-            <span>3. RIFIUTI</span>
-            <label class="no-print" style="font-size: 11px; font-weight: normal; cursor: pointer;">
-              <input type="checkbox" id="aspect_chk_2" onchange="toggleBody('body_2', 'aspect_card_2', this.checked)"> Presente / Rilevante
-            </label>
-          </div>
-          <div id="body_2" class="aspect-body">
-            <script>document.write(renderRow('c3_1', 'Presenza depositi temporanei rifiuti regolarmente allestiti'));</script>
-            <script>document.write(renderRow('c3_2', 'Presenza in planimetria aree deposito temporaneo'));</script>
-            <script>document.write(renderRow('c3_3', 'Presenza caratterizzazioni e classificazione rifiuti'));</script>
-            <script>document.write(renderRow('c3_4', 'Controllo polverosità e gestione cumuli'));</script>
-            <script>document.write(renderRow('c3_5', 'Apertura e tenuta registro carico/scarico'));</script>
-            <script>document.write(renderRow('c3_6', 'Verifica autorizzazioni soggetti gestori'));</script>
-          </div>
-        </div>
-
-        <!-- COMPONENTE 4 -->
-        <div id="aspect_card_3" class="aspect-box aspect-inactive-print">
-          <div class="aspect-header">
-            <span>4. GESTIONE DELLE TERRE E ROCCE DA SCAVO</span>
-            <label class="no-print" style="font-size: 11px; font-weight: normal; cursor: pointer;">
-              <input type="checkbox" id="aspect_chk_3" onchange="toggleBody('body_3', 'aspect_card_3', this.checked)"> Presente / Rilevante
-            </label>
-          </div>
-          <div id="body_3" class="aspect-body">
-            <script>document.write(renderRow('c4_1', 'Presenti cumuli da gestire come sottoprodotto'));</script>
-            <script>document.write(renderRow('c4_2', 'Presenti cumuli ai sensi del D.Lgs. 152/06'));</script>
-            <script>document.write(renderRow('c4_3', 'Caratterizzazione ambientale dei cumuli'));</script>
-            <script>document.write(renderRow('c4_4', 'Trasporti in regime di sottoprodotto'));</script>
-            <script>document.write(renderRow('c4_5', 'Comunicazione preventiva o piano di utilizzo'));</script>
-            <script>document.write(renderRow('c4_6', 'Rispetto prescrizioni Piano Cave'));</script>
-            <script>document.write(renderRow('c4_7', 'Deposito presso sito produzione o deposito autorizzato'));</script>
-            <script>document.write(renderRow('c4_8', 'Compilazione registri SGA'));</script>
-          </div>
-        </div>
-
-        <!-- COMPONENTE 5 -->
-        <div id="aspect_card_4" class="aspect-box aspect-inactive-print">
-          <div class="aspect-header">
-            <span>5. RUMORE E VIBRAZIONI</span>
-            <label class="no-print" style="font-size: 11px; font-weight: normal; cursor: pointer;">
-              <input type="checkbox" id="aspect_chk_4" onchange="toggleBody('body_4', 'aspect_card_4', this.checked)"> Presente / Rilevante
-            </label>
-          </div>
-          <div id="body_4" class="aspect-body">
-            <script>document.write(renderRow('c5_1', 'Valutazione Previsionale Impatto Acustico (VPIA)'));</script>
-            <script>document.write(renderRow('c5_2', 'Presenza deroga acustica in corso di validità'));</script>
-            <script>document.write(renderRow('c5_3', 'Presenza e posizionamento sistemi mitigazione'));</script>
-          </div>
-        </div>
-
-        <!-- COMPONENTE 6 -->
-        <div id="aspect_card_5" class="aspect-box aspect-inactive-print">
-          <div class="aspect-header">
-            <span>6. SUOLO E SOTTOSUOLO</span>
-            <label class="no-print" style="font-size: 11px; font-weight: normal; cursor: pointer;">
-              <input type="checkbox" id="aspect_chk_5" onchange="toggleBody('body_5', 'aspect_card_5', this.checked)"> Presente / Rilevante
-            </label>
-          </div>
-          <div id="body_5" class="aspect-body">
-            <script>document.write(renderRow('c6_1', 'Presenza potenziali contaminazioni suolo/sottosuolo'));</script>
-            <script>document.write(renderRow('c6_2', 'Compilazione registri SGA'));</script>
-          </div>
-        </div>
-
-        <!-- COMPONENTE 7 -->
-        <div id="aspect_card_6" class="aspect-box aspect-inactive-print">
-          <div class="aspect-header">
-            <span>7. SOSTANZE PERICOLOSE</span>
-            <label class="no-print" style="font-size: 11px; font-weight: normal; cursor: pointer;">
-              <input type="checkbox" id="aspect_chk_6" onchange="toggleBody('body_6', 'aspect_card_6', this.checked)"> Presente / Rilevante
-            </label>
-          </div>
-          <div id="body_6" class="aspect-body">
-            <script>document.write(renderRow('c7_1', 'Stoccaggio idoneo sostanze pericolose'));</script>
-            <script>document.write(renderRow('c7_2', 'Presenza attività soggette a SCIA antincendio'));</script>
-            <script>document.write(renderRow('c7_3', 'Nomina consulente ADR laddove previsto'));</script>
-            <script>document.write(renderRow('c7_4', 'Presenza schede tecniche e di sicurezza (SDS)'));</script>
-            <script>document.write(renderRow('c7_5', 'Indicazione in planimetria area stoccaggio'));</script>
-            <script>document.write(renderRow('c7_6', 'Compilazione registri SGA'));</script>
-            <script>document.write(renderRow('c7_7', 'Presenza e accessibilità kit anti-sversamento'));</script>
-          </div>
-        </div>
-
-        <!-- COMPONENTE 8 -->
-        <div id="aspect_card_7" class="aspect-box aspect-inactive-print">
-          <div class="aspect-header">
-            <span>8. INTERFERENZA CON VIABILITÀ</span>
-            <label class="no-print" style="font-size: 11px; font-weight: normal; cursor: pointer;">
-              <input type="checkbox" id="aspect_chk_7" onchange="toggleBody('body_7', 'aspect_card_7', this.checked)"> Presente / Rilevante
-            </label>
-          </div>
-          <div id="body_7" class="aspect-body">
-            <script>document.write(renderRow('c8_1', 'Strade pubbliche limitrofe o interferenti'));</script>
-            <script>document.write(renderRow('c8_2', 'Ottemperanza Piano del Traffico'));</script>
-            <script>document.write(renderRow('c8_3', 'Altre limitazioni ai trasporti'));</script>
-            <script>document.write(renderRow('c8_4', 'Presenza ed idoneità aree di attesa mezzi'));</script>
-          </div>
-        </div>
-
-        <!-- COMPONENTE 9 -->
-        <div id="aspect_card_8" class="aspect-box aspect-inactive-print">
-          <div class="aspect-header">
-            <span>9. CONFORMITÀ LEGISLATIVA</span>
-            <label class="no-print" style="font-size: 11px; font-weight: normal; cursor: pointer;">
-              <input type="checkbox" id="aspect_chk_8" onchange="toggleBody('body_8', 'aspect_card_8', this.checked)"> Presente / Rilevante
-            </label>
-          </div>
-          <div id="body_8" class="aspect-body">
-            <script>document.write(renderRow('c9_1', 'Aggiornamento Quadro Adempimenti Ambientali'));</script>
-            <script>document.write(renderRow('c9_2', 'Presenza e aggiornamento registro autorizzazioni'));</script>
-            <script>document.write(renderRow('c9_3', 'Aggiornamento semestrale verifica conformità'));</script>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- SEZIONE 3 -->
-      <div class="section-title">
-        <span>3. Rilievi, Anomalie e Note di Cantiere</span>
-        <button onclick="addObservation()" class="btn btn-primary no-print" style="font-size: 11px; padding: 4px 8px;">+ Aggiungi Rilievo</button>
-      </div>
-      <div id="observations-list"></div>
-
-      <!-- SEZIONE 4 -->
-      <div class="section-title">4. Conclusioni e Prescrizioni Finali</div>
-      <textarea id="conclusioni" rows="3" placeholder="Note conclusive o prescrizioni per la Direzione Cantiere..." class="form-control"></textarea>
-
-      <!-- SEZIONE 5 -->
-      <div class="section-title">5. Firme di Convalida</div>
-      <div class="grid-2">
-        <div>
-          <label style="font-size: 12px; font-weight: 700;">Il Redattore / Referente Ambientale</label>
-          <input type="text" id="nome-redattore" placeholder="Nome e Cognome" class="form-control" style="margin: 4px 0 6px 0;">
-          <div class="canvas-container">
-            <canvas id="canvas-redattore"></canvas>
-            <button onclick="clearCanvas('canvas-redattore')" class="no-print" style="position: absolute; top: 4px; right: 4px; font-size: 10px; background: #e2e8f0; border: none; padding: 2px 6px; border-radius: 4px; cursor: pointer;">Pulisci</button>
-          </div>
-        </div>
-        <div>
-          <label style="font-size: 12px; font-weight: 700;">La Direzione di Cantiere / Rappresentante</label>
-          <input type="text" id="nome-direzione" placeholder="Nome e Cognome" class="form-control" style="margin: 4px 0 6px 0;">
-          <div class="canvas-container">
-            <canvas id="canvas-direzione"></canvas>
-            <button onclick="clearCanvas('canvas-direzione')" class="no-print" style="position: absolute; top: 4px; right: 4px; font-size: 10px; background: #e2e8f0; border: none; padding: 2px 6px; border-radius: 4px; cursor: pointer;">Pulisci</button>
-          </div>
-        </div>
-      </div>
+      </section>
 
     </div>
   </main>
 
   <script>
-    // Configurazione Firebase Realtime Storage Online
+    // Configurazione Firebase Realtime Database
     const firebaseConfig = {
       databaseURL: "https://verbale-ambientale-default-rtdb.europe-west1.firebasedatabase.app"
     };
@@ -361,28 +207,24 @@
     }
     const db = firebase.database();
 
-    function renderRow(key, label) {
-      return `
-        <div class="item-row">
-          <div class="item-top">
-            <div class="item-text">${label}</div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <div class="radio-group">
-                <label class="radio-btn"><input type="radio" name="${key}_val" value="SI"> SÌ</label>
-                <label class="radio-btn"><input type="radio" name="${key}_val" value="NO"> NO</label>
-                <label class="radio-btn"><input type="radio" name="${key}_val" value="NA" checked> N.A.</label>
-              </div>
-              <label class="no-print btn" style="padding: 4px 8px; font-size: 11px; background: #e2e8f0; color: #334155; cursor: pointer;">
-                📷 Foto
-                <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoUpload(event, '${key}')">
-              </label>
-            </div>
-          </div>
-          <input type="text" id="${key}_note" placeholder="Note specifiche..." class="form-control" style="margin-top: 6px; font-size: 11px;">
-          <div id="photos_${key}" class="photo-preview-container"></div>
-        </div>
-      `;
-    }
+    const environmentalAspects = [
+      {
+        id: "comp1",
+        title: "1. APPROVVIGIONAMENTO IDRICO E GESTIONE ACQUE REFLUE",
+        subsections: [
+          { subtitle: "PRELIEVI", items: ["Presenti approvvigionamenti idrici in cantiere", "Misurazione e registrazione dei prelievi idrici", "Effettuazione analisi delle acque", "Presenza della programmazione annuale delle attività di controllo dei prelievi"] },
+          { subtitle: "SCARICHI", items: ["Presenti scarichi idrici in cantiere", "Controllo dei parametri prima dell'immissione nel reticolo idrico superficiale", "Controllo mensile dei parametri (pH, solidi sospesi totali, COD, idrocarburi, ecc.)", "Campionamento scarico ed analisi da personale qualificato (ACCREDIA)", "Presenza di un impianto di trattamento acque", "Funzionamento dei sistemi di rilevamento in continuo dei parametri (pH, solidi, idrocarburi)", "Pianificazione della manutenzione ordinaria e straordinaria delle apparecchiature", "Pianificazione della gestione di eventuali emergenze", "Autorizzazioni / licenze / nulla osta vigenti", "Compilazione dei registri previsti dalle procedure SGA"] }
+        ]
+      },
+      { id: "comp2", title: "2. EMISSIONI IN ATMOSFERA", subsections: [{ items: ["Presenza punti di emissione in atmosfera", "Presenza di sistemi di abbattimento polveri", "Presenza di potenziale polverosità/fangosità delle piste", "Presenza di vasche di lavaggio ruote ed effettivo utilizzo", "Compilazione dei registri previsti dalle procedure SGA"] }] },
+      { id: "comp3", title: "3. RIFIUTI", subsections: [{ items: ["Presenza depositi temporanei di rifiuti regolarmente allestiti e identificati", "Presenza nella planimetria di cantiere delle aree di deposito temporaneo", "Presenza caratterizzazioni e classificazione dei rifiuti prodotti", "Controllo della polverosità e patti di gestione cumuli", "Apertura e tenuta corretta del registro di carico/scarico", "Verifica autorizzazioni dei soggetti individuati per la gestione"] }] },
+      { id: "comp4", title: "4. GESTIONE DELLE TERRE E ROCCE DA SCAVO", subsections: [{ items: ["Presenti cumuli di materiale da scavo da gestire come sottoprodotto", "Presenti cumuli di materiale da scavo da gestire ai sensi del D.Lgs. 152/06", "I cumuli presenti sono stati oggetto di caratterizzazione ambientale", "Previsti trasporti in regime di sottoprodotto", "Trasporti riportati nella comunicazione preventiva o piano di utilizzo", "Rispetto delle prescrizioni del Piano Cave o Autorizzazioni pertinenti", "Il deposito è effettuato presso il sito di produzione o deposito intermedio autorizzato", "Compilazione dei registri previsti dalle procedure SGA"] }] },
+      { id: "comp5", title: "5. RUMORE E VIBRAZIONI", subsections: [{ items: ["Effettuazione di una Valutazione Previsionale di Impatto Acustico (VPIA)", "Presenza di deroga acustica in corso di validità per attività rumorose", "Presenza e corretto posizionamento di sistemi di mitigazione"] }] },
+      { id: "comp6", title: "6. SUOLO E SOTTOSUOLO", subsections: [{ items: ["Presenza di potenziali contaminazioni del suolo/sottosuolo", "Compilazione dei registri previsti dalle procedure SGA"] }] },
+      { id: "comp7", title: "7. SOSTANZE PERICOLOSE", subsections: [{ items: ["Previsto stoccaggio idoneo delle sostanze pericolose", "Presenza di`attività soggette a SCIA antincendio", "Nomina consulente ADR laddove previsto", "Presenza in cantiere delle schede tecniche e di sicurezza (SDS) aggiornate", "Indicazione nella planimetria di cantiere dell'area di stoccaggio prodotti chimici/carburanti", "Compilazione dei registri previsti dalle procedure SGA", "Presenza e accessibilità kit anti-sversamento nelle aree a rischio"] }] },
+      { id: "comp8", title: "8. INTERFERENZA CON VIABILITÀ INTERESSATA DAI CANTIERI", subsections: [{ items: ["Presenti strade pubbliche limitrofe o interferenti con il cantiere", "Prevista ottemperanza al Piano del Traffico in caso di trasporti pesanti", "Presenti altre limitazioni ai trasporti (ordinanze comunali, orari)", "Presenti ed idonee aree di attesa dei mezzi"] }] },
+      { id: "comp9", title: "9. CONFORMITÀ LEGISLATIVA", subsections: [{ items: ["Aggiornamento Quadro degli Adempimenti Ambientali", "Presenza e aggiornamento del registro delle autorizzazioni", "Aggiornamento semestrale della verifica di conformità legislativa"] }] }
+    ];
 
     const photoStore = {};
     const participantsList = [];
@@ -391,28 +233,27 @@
       const now = new Date();
       now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
       document.getElementById('datetime').value = now.toISOString().slice(0,16);
+
+      renderAspects();
       initCanvases();
     });
 
-    function toggleBody(bodyId, cardId, isChecked) {
-      const body = document.getElementById(bodyId);
-      const card = document.getElementById(cardId);
-      if (isChecked) {
-        body.style.display = 'block';
-        card.classList.remove('aspect-inactive-print');
-      } else {
-        body.style.display = 'none';
-        card.classList.add('aspect-inactive-print');
-      }
+    function addParticipant() {
+      const nomeInput = document.getElementById('input-partecipante-nome');
+      const ruoloInput = document.getElementById('input-partecipante-ruolo');
+      const nome = nomeInput.value.trim();
+      const ruolo = ruoloInput.value.trim();
+
+      if (!nome) return;
+
+      participantsList.push({ nome, ruolo });
+      nomeInput.value = '';
+      ruoloInput.value = '';
+      renderParticipants();
     }
 
-    function addParticipant() {
-      const nome = document.getElementById('input-partecipante-nome').value.trim();
-      const ruolo = document.getElementById('input-partecipante-ruolo').value.trim();
-      if (!nome) return;
-      participantsList.push({ nome, ruolo });
-      document.getElementById('input-partecipante-nome').value = '';
-      document.getElementById('input-partecipante-ruolo').value = '';
+    function removeParticipant(index) {
+      participantsList.splice(index, 1);
       renderParticipants();
     }
 
@@ -420,53 +261,138 @@
       const container = document.getElementById('participants-list');
       container.innerHTML = '';
       participantsList.forEach((p, idx) => {
-        container.innerHTML += `<span class="badge"><strong>${p.nome}</strong> ${p.ruolo ? `(${p.ruolo})` : ''} <span class="badge-close no-print" onclick="participantsList.splice(${idx},1); renderParticipants();">&times;</span></span>`;
+        const badge = document.createElement('span');
+        badge.className = "inline-flex items-center gap-1.5 bg-slate-200 text-slate-800 text-xs px-2.5 py-1 rounded-full border border-slate-300";
+        badge.innerHTML = `
+          <strong>${p.nome}</strong> ${p.ruolo ? `<span class="text-slate-500">(${p.ruolo})</span>` : ''}
+          <button onclick="removeParticipant(${idx})" class="no-print text-slate-400 hover:text-red-600 ml-1 font-bold">&times;</button>
+        `;
+        container.appendChild(badge);
+      });
+    }
+
+    function toggleAspect(aIdx) {
+      const checkbox = document.getElementById(`aspect_toggle_${aIdx}`);
+      const body = document.getElementById(`aspect_body_${aIdx}`);
+      const card = document.getElementById(`aspect_card_${aIdx}`);
+
+      if (checkbox.checked) {
+        body.classList.remove('hidden');
+        card.classList.remove('aspect-inactive-print');
+        card.classList.add('border-emerald-300', 'bg-white');
+        card.classList.remove('bg-slate-50/50', 'border-slate-200');
+      } else {
+        body.classList.add('hidden');
+        card.classList.add('aspect-inactive-print');
+        card.classList.remove('border-emerald-300', 'bg-white');
+        card.classList.add('bg-slate-50/50', 'border-slate-200');
+      }
+    }
+
+    function renderAspects() {
+      const container = document.getElementById('aspects-container');
+      container.innerHTML = '';
+
+      environmentalAspects.forEach((aspect, aIdx) => {
+        const card = document.createElement('div');
+        card.id = `aspect_card_${aIdx}`;
+        card.className = "border border-slate-200 rounded-lg overflow-hidden bg-slate-50/50 shadow-sm aspect-inactive-print transition-all";
+
+        let subHTML = '';
+        aspect.subsections.forEach((sub, sIdx) => {
+          let itemsHTML = '';
+          sub.items.forEach((itemText, iIdx) => {
+            const key = `item_${aIdx}_${sIdx}_${iIdx}`;
+            if (!photoStore[key]) photoStore[key] = [];
+
+            itemsHTML += `
+              <div class="p-3 bg-slate-50/70 border border-slate-200 rounded mb-2">
+                <div class="flex flex-col md:flex-row justify-between gap-2">
+                  <div class="text-xs font-medium text-slate-800 md:w-1/2">${itemText}</div>
+                  <div class="flex items-center gap-2">
+                    <div class="flex items-center space-x-1 text-xs">
+                      <label class="bg-emerald-50 text-emerald-800 px-2 py-1 rounded cursor-pointer border"><input type="radio" name="${key}_val" value="SI"> SÌ</label>
+                      <label class="bg-red-50 text-red-800 px-2 py-1 rounded cursor-pointer border"><input type="radio" name="${key}_val" value="NO"> NO</label>
+                      <label class="bg-slate-100 text-slate-600 px-2 py-1 rounded cursor-pointer border"><input type="radio" name="${key}_val" value="NA" checked> N.A.</label>
+                    </div>
+                    <label class="no-print bg-white hover:bg-slate-100 border text-slate-700 text-xs px-2 py-1 rounded cursor-pointer flex items-center gap-1 shadow-sm">
+                      <i class="fa-solid fa-camera text-slate-500"></i> Foto
+                      <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handlePhotoUpload(event, '${key}')">
+                    </label>
+                  </div>
+                </div>
+                <input type="text" id="${key}_note" placeholder="Note specifiche..." class="w-full border border-slate-300 rounded px-2 py-1 text-xs mt-2 bg-white">
+                <div id="${key}_photos" class="flex flex-wrap gap-2 mt-2"></div>
+              </div>
+            `;
+          });
+          subHTML += `<div class="mb-2">${sub.subtitle ? `<h5 class="text-xs font-bold text-slate-500 uppercase mb-1">${sub.subtitle}</h5>` : ''}${itemsHTML}</div>`;
+        });
+
+        card.innerHTML = `
+          <div class="bg-slate-100 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+            <span class="font-bold text-xs md:text-sm text-slate-800">${aspect.title}</span>
+            <label class="inline-flex items-center cursor-pointer gap-2 bg-white px-3 py-1 rounded-full border border-slate-300 shadow-sm no-print">
+              <span class="text-xs font-bold text-slate-600">Presente / Rilevante?</span>
+              <input type="checkbox" id="aspect_toggle_${aIdx}" onchange="toggleAspect(${aIdx})" class="w-4 h-4 accent-emerald-600 cursor-pointer">
+            </label>
+          </div>
+          <div id="aspect_body_${aIdx}" class="p-3 hidden">
+            ${subHTML}
+          </div>
+        `;
+        container.appendChild(card);
       });
     }
 
     function handlePhotoUpload(event, key) {
-      const file = event.target.files[0];
-      if (!file) return;
-      if (!photoStore[key]) photoStore[key] = [];
+      const files = event.target.files;
+      if (!files || !files[0]) return;
       const reader = new FileReader();
       reader.onload = function(e) {
+        if (!photoStore[key]) photoStore[key] = [];
         photoStore[key].push(e.target.result);
-        renderItemPhotos(key);
+        renderPhotos(key);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(files[0]);
     }
 
-    function renderItemPhotos(key) {
-      const container = document.getElementById(`photos_${key}`);
+    function renderPhotos(key) {
+      const container = document.getElementById(`${key}_photos`);
       if (!container) return;
       container.innerHTML = '';
-      (photoStore[key] || []).forEach((src, pIdx) => {
+      (photoStore[key] || []).forEach((src, idx) => {
         container.innerHTML += `
-          <div class="photo-thumb">
-            <img src="${src}">
-            <button class="photo-delete no-print" onclick="photoStore['${key}'].splice(${pIdx}, 1); renderItemPhotos('${key}')">&times;</button>
+          <div class="relative inline-block">
+            <img src="${src}" class="w-12 h-12 object-cover rounded border">
+            <button onclick="photoStore['${key}'].splice(${idx},1); renderPhotos('${key}')" class="no-print absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-4 h-4 text-[10px]">&times;</button>
           </div>
         `;
       });
     }
 
     let obsCount = 0;
-    function addObservation() {
+    function addObservation(data = null) {
       obsCount++;
       const id = `obs_${obsCount}`;
       const list = document.getElementById('observations-list');
-      const div = document.createElement('div');
-      div.id = id;
-      div.style.cssText = "border: 1px solid #fde68a; background: #fffbeb; padding: 10px; border-radius: 6px; margin-bottom: 8px; position: relative;";
-      div.innerHTML = `
-        <button onclick="document.getElementById('${id}').remove()" class="no-print" style="position: absolute; top: 6px; right: 8px; border: none; background: transparent; color: #ef4444; font-weight: bold; cursor: pointer;">&times;</button>
-        <div class="grid-2" style="margin-bottom: 6px;">
-          <input type="text" id="${id}_zona" placeholder="Zona / Categoria" class="form-control" style="font-size: 11px;">
-          <select id="${id}_tipo" class="form-control" style="font-size: 11px;"><option>Osservazione</option><option>Non Conformità Minore</option><option>Non Conformità Maggiore</option></select>
+      const card = document.createElement('div');
+      card.id = id;
+      card.className = "border border-amber-200 bg-amber-50/40 rounded-lg p-3 relative";
+      card.innerHTML = `
+        <button onclick="document.getElementById('${id}').remove()" class="no-print absolute top-2 right-2 text-slate-400 hover:text-red-600 text-xs"><i class="fa-solid fa-trash"></i></button>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
+          <input type="text" id="${id}_zona" value="${data ? data.zona : ''}" placeholder="Zona / Categoria" class="border rounded p-1 text-xs">
+          <select id="${id}_tipo" class="border rounded p-1 text-xs bg-white">
+            <option value="Osservazione" ${data && data.tipo==='Osservazione'?'selected':''}>Osservazione</option>
+            <option value="Non Conformità Minore" ${data && data.tipo==='Non Conformità Minore'?'selected':''}>Non Conformità Minore</option>
+            <option value="Non Conformità Maggiore" ${data && data.tipo==='Non Conformità Maggiore'?'selected':''}>Non Conformità Maggiore</option>
+          </select>
+          <input type="text" id="${id}_resp" value="${data ? data.resp : ''}" placeholder="Responsabile / Scadenza" class="border rounded p-1 text-xs">
         </div>
-        <textarea id="${id}_desc" rows="2" placeholder="Descrizione rilievo e azioni correttive..." class="form-control" style="font-size: 11px;"></textarea>
+        <textarea id="${id}_desc" rows="2" placeholder="Descrizione rilievo..." class="w-full border rounded p-1 text-xs">${data ? data.desc : ''}</textarea>
       `;
-      list.appendChild(div);
+      list.appendChild(card);
     }
 
     function initCanvases() {
@@ -475,7 +401,10 @@
         const ctx = canvas.getContext('2d');
         let drawing = false;
 
-        function resize() { canvas.width = canvas.parentElement.getBoundingClientRect().width; canvas.height = 110; }
+        function resize() {
+          canvas.width = canvas.parentElement.getBoundingClientRect().width;
+          canvas.height = 112;
+        }
         resize();
 
         function getPos(e) {
@@ -500,12 +429,51 @@
       canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
     }
 
-    // SALVATAGGIO IN CLOUD
+    // SALVATAGGIO IN CLOUD (Firebase)
     function saveToCloud() {
       const cantiere = document.getElementById('cantiere').value.trim() || "Cantiere";
       const area = document.getElementById('area').value.trim() || "Area";
-      const docId = prompt("Inserisci un nome/codice identificativo per questa bozza Cloud:", `${cantiere}_${area}`);
+      const docId = prompt("Inserisci un nome/codice identificativo per questa bozza Cloud:", `${cantiere}_${area}`.replace(/\s+/g, '_'));
       if (!docId) return;
+
+      // Raccogli stato aspetti e radio
+      const aspectsState = {};
+      environmentalAspects.forEach((aspect, aIdx) => {
+        const chk = document.getElementById(`aspect_toggle_${aIdx}`);
+        aspectsState[aIdx] = chk ? chk.checked : false;
+
+        aspect.subsections.forEach((sub, sIdx) => {
+          sub.items.forEach((itemText, iIdx) => {
+            const key = `item_${aIdx}_${sIdx}_${iIdx}`;
+            const radios = document.querySelectorAll(`input[name="${key}_val"]`);
+            let val = 'NA';
+            radios.forEach(r => { if (r.checked) val = r.value; });
+            const noteEl = document.getElementById(`${key}_note`);
+            aspectsState[key] = {
+              val: val,
+              note: noteEl ? noteEl.value : ''
+            };
+          });
+        });
+      });
+
+      // Raccogli rilievi
+      const observations = [];
+      document.querySelectorAll('#observations-list > div').forEach(card => {
+        const id = card.id;
+        const zonaEl = document.getElementById(`${id}_zona`);
+        const tipoEl = document.getElementById(`${id}_tipo`);
+        const respEl = document.getElementById(`${id}_resp`);
+        const descEl = document.getElementById(`${id}_desc`);
+        if (zonaEl) {
+          observations.push({
+            zona: zonaEl.value,
+            tipo: tipoEl ? tipoEl.value : '',
+            resp: respEl ? respEl.value : '',
+            desc: descEl ? descEl.value : ''
+          });
+        }
+      });
 
       const formData = {
         cantiere: document.getElementById('cantiere').value,
@@ -516,25 +484,22 @@
         nomeRedattore: document.getElementById('nome-redattore').value,
         nomeDirezione: document.getElementById('nome-direzione').value,
         participantsList: participantsList,
+        aspectsState: aspectsState,
         photoStore: photoStore,
+        observations: observations,
         timestamp: Date.now()
       };
-
-      // Salva checkbox aspetti
-      for (let i = 0; i < 9; i++) {
-        formData[`aspect_chk_${i}`] = document.getElementById(`aspect_chk_${i}`).checked;
-      }
 
       db.ref('verbali/' + docId.replace(/[.#$/[\]]/g, "_")).set(formData, (error) => {
         if (error) {
           alert("Errore nel salvataggio Cloud: " + error.message);
         } else {
-          alert("☁️ Bozza salvata in Cloud con successo!\nNome Bozza: " + docId);
+          alert("☁️ Bozza salvata in Cloud con successo!\nIdentificativo: " + docId);
         }
       });
     }
 
-    // CARICAMENTO DAL CLOUD
+    // APRI DA CLOUD (Firebase)
     function loadFromCloud() {
       db.ref('verbali').once('value', (snapshot) => {
         const data = snapshot.val();
@@ -544,7 +509,7 @@
         }
 
         const keys = Object.keys(data);
-        const selectedKey = prompt("Bozze trovate nel Cloud:\n\n" + keys.join("\n") + "\n\nDigita il nome esatto della bozza da aprire:");
+        const selectedKey = prompt("Bozze disponibili nel Cloud:\n\n- " + keys.join("\n- ") + "\n\nDigita il nome esatto della bozza da caricare:");
         if (!selectedKey || !data[selectedKey]) return;
 
         const record = data[selectedKey];
@@ -564,19 +529,44 @@
 
         if (record.photoStore) {
           Object.assign(photoStore, record.photoStore);
-          Object.keys(photoStore).forEach(k => renderItemPhotos(k));
+          Object.keys(photoStore).forEach(k => renderPhotos(k));
         }
 
-        for (let i = 0; i < 9; i++) {
-          if (record[`aspect_chk_${i}`] !== undefined) {
-            const chk = document.getElementById(`aspect_chk_${i}`);
-            chk.checked = record[`aspect_chk_${i}`];
-            toggleBody(`body_${i}`, `aspect_card_${i}`, chk.checked);
-          }
+        if (record.aspectsState) {
+          environmentalAspects.forEach((aspect, aIdx) => {
+            const isChecked = record.aspectsState[aIdx] || false;
+            const chk = document.getElementById(`aspect_toggle_${aIdx}`);
+            if (chk) {
+              chk.checked = isChecked;
+              toggleAspect(aIdx);
+            }
+
+            aspect.subsections.forEach((sub, sIdx) => {
+              sub.items.forEach((itemText, iIdx) => {
+                const key = `item_${aIdx}_${sIdx}_${iIdx}`;
+                const itemData = record.aspectsState[key];
+                if (itemData) {
+                  const radios = document.querySelectorAll(`input[name="${key}_val"]`);
+                  radios.forEach(r => { if (r.value === itemData.val) r.checked = true; });
+                  const noteEl = document.getElementById(`${key}_note`);
+                  if (noteEl) noteEl.value = itemData.note || '';
+                }
+              });
+            });
+          });
+        }
+
+        if (record.observations) {
+          document.getElementById('observations-list').innerHTML = '';
+          record.observations.forEach(obs => addObservation(obs));
         }
 
         alert("📂 Bozza caricata con successo dal Cloud!");
       });
+    }
+
+    function resetForm() { 
+      if(confirm("Sei sicuro di voler resettare tutti i campi?")) location.reload(); 
     }
   </script>
 </body>
